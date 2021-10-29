@@ -40,7 +40,7 @@ class TableControl(APIView):
         return Response({'success':False})
         """
         
-        # в self.ModelSerializer не вызываеться метод update, поэтому вставили костыль ниже
+        # в self.ModelSerializer не вызываеться метод update, поэтому напрямую запись в базу
 
         obj = self.Model.objects.get(id=pk)
 

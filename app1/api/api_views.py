@@ -30,29 +30,26 @@ class TableControl(APIView):
         return Response({'success':False})
         
     def put(self, request, pk):
-        data = request.data
-
-        obj = self.Model.objects.filter(id=pk)        
-        fields =[f.name for f in self.Model._meta.get_fields()]
-        
-        values = obj.values()[0]
-
-        for f in fields:
-            if f not in values.keys():
-                values[f] = values['%s_id'%f]
-                del values['%s_id'%f]
-        del values['id']
-
-        for d in data:
-            values[d] = data[d]
-
+        """
         obj = get_object_or_404(self.Model.objects.all(), pk=pk)
-        serializer = self.ModelSerializer(instance=obj, data = values)
-
+        serializer = self.ModelSerializer(instance=obj, data = request.data)
+        #return Response(str(serializer))
         if serializer.is_valid(raise_exception=True):
             saved = serializer.save()
             return Response({'success':True,'id':pk})
-        return Response({'success':False, 'msg':'почему-то не работает, если не все поля ообновлять!???'})
+        return Response({'success':False})
+        """
+        
+        # в self.ModelSerializer не вызываеться метод update, поэтому вставили костыль ниже
+
+        obj = self.Model.objects.get(id=pk)
+
+        for d in request.data:
+            obj.__dict__[d] = request.data[d]
+        
+        obj.save()
+
+        return Response({'success':True,'id':pk})
         
     def delete(self, request, pk):
         obj = get_object_or_404(self.Model.objects.all(), pk=pk)
